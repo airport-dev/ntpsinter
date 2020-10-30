@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>うんてんめんきょをつくろう！</title>
+  <meta charset="utf-8">
+  <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/siimple@3.1.0/dist/siimple.min.css">-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.css" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <style type="text/css">
+    [v-cloak] {
+      display: none;
+    }
+    .balloon1-left {
+    position: relative;
+    display: inline-block;
+    margin: 1.5em 0 1.5em 15px;
+    padding: 7px 10px;
+    min-width: 120px;
+    max-width: 100%;
+    color: #555;
+    font-size: 16px;
+    background: #e0edff;
+  }
+  
+  .balloon1-left:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -30px;
+    margin-top: -15px;
+    border: 15px solid transparent;
+    border-right: 15px solid #e0edff;
+  }
+  .balloon1-left h3 {
+    margin: 0;
+    padding: 0;
+  }
+  .cropper-area img {
+    display: block;
+    max-width: 100%;
+  }
+  </style>
+</head>
+<head>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <v-app>
+      <div id="wrap" class="d-flex justify-center wrap flex-column">
+        <!--ヘッターの開始-->
+        <v-app-bar color="#fff" flat class="py-4 justify-start">
+          <v-flex>
+            <v-container>
+              <v-img src="https://www.ntpgroup.jp/img/logo.png" contain max-width="280px"  max-height="40px"></v-img>
+            </v-container>
+          </v-flex>
+          <!--ナビゲーション-->
+          <v-flex>
+            <v-container>
+              <v-stepper style=" box-shadow: 0 3px 1px -2px rgba(0,0,0,0), 0 2px 2px 0 rgba(0,0,0,0), 0 1px 5px 0 rgba(0,0,0,0) !important;">
+                <v-stepper-header style="box-shadow: 0 3px 1px -2px rgba(0,0,0,0), 0 2px 2px 0 rgba(0,0,0,0), 0 1px 5px 0 rgba(0,0,0,0) !important;">
+                  <v-stepper-step step="1" complete editable>
+                    写真を撮影するよ！
+                  </v-stepper-step>
+                  <v-divider></v-divider>
+                  <v-stepper-step step="2">
+                    写真を選択するよ！
+                  </v-stepper-step>
+                  <v-divider></v-divider>
+                  <v-stepper-step step="3">
+                    データを入力するよ
+                  </v-stepper-step>
+                  <v-divider></v-divider>
+                  <v-stepper-step step="4">
+                    免許証完成！
+                  </v-stepper-step>
+                </v-stepper-header>
+              </v-stepper>
+            </v-container>
+          </v-flex>
+        </v-app-bar>
+        <!--メインの要素開始-->
+        <v-main class="mt-7">
+          <v-container fluid>
+            <v-layout class="wrap justify-space-around">
+              <!--左側のBox-->
+              <v-flex xs6 sm6 md3 lg3 xl3>
+                <!--笑顔の数値-->
+                <v-container>
+                  <v-card flat>
+                    <v-card-title>
+                      <h3>スマイルのデータだよ！</h3>
+                    </v-card-title>
+                    <!--グラフの表示-->
+                    <div class="pa-4 d-flex justify-center" v-if="result_facedetails.length <1">
+                      <v-flex>
+                        <v-icon
+                          color="gray"
+                          class="ml-8"
+                          size="48"
+                        >
+                          mdi-emoticon-neutral-outline
+                        </v-icon>
+                        <div class="balloon1-left">
+                          <h3>....</h3>
+                        </div>
+                      </v-flex>
+                    </div>
+                    <div class="pa-4" v-else>
+                      <v-icon
+                        :color="result_facedetails.Smile.Value ? 'red lighten-2' : 'indigo'"
+                        class="ml-8"
+                        size="48"
+                      >
+                        {{ result_facedetails.Smile.Value? 'mdi-emoticon-outline': 'mdi-emoticon-neutral-outline'  }}
+                      </v-icon>
+                      <div class="balloon1-left">
+                        <h3>{{ result_facedetails.Smile.Value? 'ナイススマイル！': '笑って！笑って！'  }}</h3>
+                      </div>
+                    </div>
+                    <v-sheet class="pa-4 d-flex justify-space-around">
+                      <v-flex>
+                        <h3>今回の記録:</h3>
+                        <h4>{{ Math.floor( result_smileData.slice(-1)[0])  }}</h4>
+                      </v-flex>
+                      <v-flex>
+                        <h3>最大の記録:</h3>
+                        <h4>{{ Math.floor(Math.max.apply(null, result_smileData)) }}</h4>
+                      </v-flex>
+                    </v-sheet>
+                  </v-card>
+                </v-container>
+                <!--パーソナル情報-->
+                <v-container>
+                  <v-card flat>
+                    <v-card-title>
+                      <h3>顔から推測したデータだよ！</h3>
+                    </v-card-title>
+                    <div class="pa-4 d-flex" v-if="result_facedetails.length < 1">
+                      <v-flex>
+                        <h3>性別:</h3>
+                        <h4>--</h4>
+                      </v-flex>
+                      <v-flex>
+                        <h3>年齢:</h3>
+                        <h4>--</h4>
+                      </v-flex>
+                    </div>
+                    <div class="pa-4 d-flex" v-else>
+                      <v-flex>
+                        <h3>性別:</h3>
+                        <h4>{{ result_facedetails.Gender.Value | DataFormat | GenderFormat }}<small>({{Math.floor(result_facedetails.Gender.Confidence)}}%)</small></h4>
+                      </v-flex>
+                      <v-flex>
+                        <h3>年齢:</h3>
+                        <h4>{{ result_facedetails.AgeRange.Low | DataFormat }}~{{ result_facedetails.AgeRange.High | DataFormat }}</h4>
+                      </v-flex>
+                    </div>
+                  </v-card>
+                </v-container>
+              </v-flex>
+              <!--真ん中のBox-->
+              <v-flex xs6 sm6 md5 lg5 xl5>
+                <!--ビデオの表示-->
+                <v-container fluid class="fill-height justify-center">
+                  <v-card flat> 
+                    <v-container fluid>
+                      <div class="text-center">
+                          <div id="videoPreview">
+                            <video
+                            ref="video" 
+                            id="video" 
+                            :width="canvassize.w"  
+                            :height="canvassize.h" 
+                            autoplay  
+                            style="display: none;"></video>
+                          </div>
+                          <div id="canvasPreview">
+                            <canvas
+                            ref="canvas" 
+                            id="canvas" 
+                            :width="canvassize.w" 
+                            :height="canvassize.h" 
+                            style="object-fit: contain"></canvas>
+                          </div>
+                          <!--メッセージ表示-->
+                          <div class="text-center mt-4">
+                            <v-alert
+                              outlined
+                              type="error"
+                              v-if="!isrecognitionflg && isAnalyzeing && result_facedetails !== ''"
+                              :width="canvassize.w"
+                            >
+                              識別エラー
+                            </v-alert>
+                            <v-alert
+                              outlined
+                              type="success"
+                              v-else-if="isrecognitionflg && isAnalyzeing && result_facedetails !== ''"
+                              :width="canvassize.w"
+                            >
+                              識別中
+                            </v-alert>
+                            <v-alert
+                              outlined
+                              icon="mdi-alert" 
+                              color="warning"
+                              v-else-if="result_facedetails === '' && isAnalyzeing && isrecognitionflg"
+                              :width="canvassize.w"
+                            >
+                              顔を検出中です。顔を近づけてください
+                            </v-alert>
+                            <v-alert
+                              outlined
+                              type="info"
+                              :width="canvassize.w"
+                              v-else
+                            >
+                              停止中
+                            </v-alert>
+                          </div>
+                      </div>
+                    </v-container>
+                  </v-card>
+                </v-container>
+              </v-flex>
+              <!--右側のBox-->
+              <v-flex xs12 sm12 md4 lg4 xl4>
+                <v-container>
+                  <!--表情解析結果表示-->
+                  <v-flex>
+                    <v-container>
+                      <v-card flat>
+                        <v-card-title>
+                          <h3>表情のデータだよ！</h3>
+                        </v-card-title>
+                        <!--グラフの表示-->
+                        <v-sheet>
+                          <canvas id="chart"></canvas>
+                        </v-sheet>
+                      </v-card>
+                    </v-container>
+                  </v-flex>
+                </v-container>
+              </v-flex>
+            </v-layout>
+            <!--タイマーの設定-->
+            <v-layout justify-center>
+              <v-flex xs6 sm6 md6 lg6 xl6>
+                <v-subheader><v-icon>mdi-timer</v-icon>残り時間:{{  timecnt  }}秒</v-subheader>
+                <v-progress-linear 
+                v-model="timeprogress"
+                :color="timecnt >= 30? 'info': timecnt >=15? 'warning' : 'error'"
+                height="15"></v-progress-linear>
+              </v-flex>
+            </v-layout>
+            <!--ボタンの設定-->
+            <v-fab-transition>
+              <v-btn
+                :color="!isAnalyzeing? 'info': 'warning'"
+                class="white--text d-flex display-1" 
+                id="snap" 
+                @click="handlercaptureBtn(),togglecaptureBtn()"
+                dark 
+                fab
+                fixed
+                bottom
+                right
+                height="150px"
+                width="150px" 
+              >
+                {{ !isAnalyzeing? "START" : "STOP" }}
+              </v-btn>
+            </v-fab-transition>
+            <!--ダイアログの表示・非表示-->
+            <v-flex>
+              <v-dialog v-model="isdoneflg" persistent>
+                <v-card class="pa-4">
+                  <v-card-title>
+                    <h3>{{ isdoneflg && !istrimming? "画像の選択":'画像の切り抜き'}}</h3>
+                  </v-card-title>
+                  <v-layout>
+                    <!--ナビゲーション-->
+                    <v-flex>
+                      <v-container>
+                        <v-stepper style=" box-shadow: 0 3px 1px -2px rgba(0,0,0,0), 0 2px 2px 0 rgba(0,0,0,0), 0 1px 5px 0 rgba(0,0,0,0) !important;">
+                          <v-stepper-header style="box-shadow: 0 3px 1px -2px rgba(0,0,0,0), 0 2px 2px 0 rgba(0,0,0,0), 0 1px 5px 0 rgba(0,0,0,0) !important;">
+                            <v-stepper-step step="1" complete>
+                              写真を撮影するよ！
+                            </v-stepper-step>
+                            <v-divider></v-divider>
+                            <v-stepper-step step="2" :editable="isdoneflg && !istrimming" complete>
+                              写真を選択するよ！
+                            </v-stepper-step>
+                            <v-divider></v-divider>
+                            <v-stepper-step step="3"  :editable="isdoneflg && eventflag" :complete="eventflag">
+                              データを入力するよ!
+                            </v-stepper-step>
+                            <v-divider></v-divider>
+                            <v-stepper-step step="4">
+                              免許証完成！
+                            </v-stepper-step>
+                          </v-stepper-header>
+                        </v-stepper>
+                      </v-container>
+                    </v-flex>
+                  </v-layout>
+                  <!--画像選択-->
+                  <v-flex v-if="isdoneflg && !istrimming">
+                    <v-card-text>
+                      以下の画像から好きな画像を一枚選択してください。
+                    </v-card-text>
+                    <v-container fluid>
+                      <v-layout wrap>
+                        <v-flex xs3 sm3 md3 lg3 xl3 v-for="(item, index) in response_photoData" :key="index">
+                          <v-container>
+                            <v-img :src="item.img" @click.stop="selectPicture(index)">
+                              <v-avatar color="blue" v-if="item.isselect">
+                                <v-icon large dark>mdi-check</v-icon>
+                              </v-avatar>
+                            </v-img>
+                          </v-container>
+                        </v-flex>
+                      </v-layout>
+                    </v-container>
+                    <v-card-actions>
+                      <v-layout justify-end>
+                        <v-btn
+                        color="indigo" 
+                        dark 
+                        large 
+                        @click.stop="istrimming = true,conftrim()"
+                        class="mx-2">OK</v-btn>
+                        <v-btn large @click.stop="isdoneflg = !isdoneflg,reset()" class="mx-2">キャンセル</v-btn>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-flex>
+                  <!--画像切り抜き-->
+                  <v-flex v-show="isdoneflg && istrimming && !previewflg">
+                    <v-container>
+                      <v-layout class="justify-center">
+                        <!--加工する画像-->
+                        <div>
+                          <v-subheader>編集する画像</v-subheader>
+                          <div class="cropper-area" id="cropperbox">
+                          </div>
+                        </div>
+                      </v-layout>
+                    </v-container>
+                    <v-card-actions>
+                      <v-layout justify-center>
+                        <v-btn 
+                        @click="cropImage(),previewflg = true" 
+                        color="indigo" 
+                        dark 
+                        large 
+                        class="mx-2">トリミングする</v-btn>
+                        <v-btn @click="istrimming = false,canselepicture()" large class="mx-2">キャンセル</v-btn>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-flex>
+                  <!--トリミングのプレビュー表示-->
+                  <v-flex v-show="isdoneflg && istrimming && previewflg && !eventflag">
+                    <v-container>
+                      <v-layout class="justify-center">
+                        <!--加工する画像-->
+                          <div>
+                            <v-subheader>プレビュー</v-subheader>
+                            <div class="cropper-area">
+                              <img id="result-img" alt="プレビュー" width="300px">
+                            </div>
+                            <v-card-text class="text-center headline">
+                              こちらでよろしいですか？よろしければOKをクリック
+                            </v-card-text>
+                          </div>
+                      </v-layout>
+                    </v-container>
+                    <v-card-actions>
+                      <v-layout justify-center>
+                        <v-btn  
+                        color="indigo" 
+                        @click="Getprofileimg(),eventflag = true" 
+                        dark 
+                        large 
+                        class="mx-2">OK
+                        </v-btn>
+                        <v-btn 
+                        @click="previewflg = !previewflg" 
+                        large 
+                        class="mx-2">キャンセル</v-btn>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-flex>
+                  <!--データ項目の入力-->
+                  <v-flex v-show="isdoneflg && istrimming && previewflg && eventflag">
+                    <v-container>
+                      <v-card-text>
+                        <v-text-field
+                          label="お名前" 
+                          v-model="formData.name"
+                          width="500px"
+                        ></v-text-field>
+                      </v-card-text>
+                    </v-container>
+                    <v-card-actions>
+                      <v-layout justify-center>
+                        <a href="./result.html">
+                          <v-btn  
+                          color="indigo" 
+                          @click="Getprofiledata(formData)" 
+                          dark 
+                          large 
+                          class="mx-2">OK
+                          </v-btn>
+                        </a>
+                        <v-btn 
+                        @click="eventflag = !eventflag" 
+                        large 
+                        class="mx-2">キャンセル</v-btn>
+                      </v-layout>
+                    </v-card-actions>
+                  </v-flex>
+                </v-card>
+              </v-dialog>
+            </v-flex>
+          </v-container>
+        </v-main>
+        <v-footer class="text-center" color="rgba(0,0,0,0)">
+          <v-row>
+            <v-col>
+              <p class="text-center pa-4">&copy; NARITAPROJECT 2020 All Right Reserved.</p>
+            </v-col>
+          </v-row>
+        </v-footer>
+      </div>
+    </v-app>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuex"></script>
+  <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script>
+  <script src="https://unpkg.com/vuex-persistedstate/dist/vuex-persistedstate.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.js" charset="UTF-8"></script>
+  <script src="./main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>うんてんめんきょをつくろう！</title>
+  <meta charset="utf-8">
+  <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/siimple@3.1.0/dist/siimple.min.css">-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <style type="text/css">
+    [v-cloak] {
+      display: none;
+    }
+    table{
+      border: 2px #000000 solid;
+    	border-collapse: separate;
+    	border-radius: 10px;
+      border-spacing: 0;
+    }
+    table tr:nth-child(4) th {
+      background-color: #c1ab05;
+    }
+    table th, table td{
+      border: solid 1px #ddd;
+      padding: 3px;
+    }
+    table td{
+      text-align: center;
+    }
+  </style>
+</head>
+<head>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <v-app>
+      <div id="wrap" class="d-flex justify-center wrap flex-column">
+        <!--ヘッターの開始-->
+        <v-app-bar color="#fff" flat class="py-4 justify-start">
+          <v-flex>
+            <v-container>
+              <v-img src="https://www.ntpgroup.jp/img/logo.png" contain max-width="280px"  max-height="40px"></v-img>
+            </v-container>
+          </v-flex>
+          <!--ナビゲーション-->
+          <v-flex>
+            <v-container>
+              <v-stepper style=" box-shadow: 0 3px 1px -2px rgba(0,0,0,0), 0 2px 2px 0 rgba(0,0,0,0), 0 1px 5px 0 rgba(0,0,0,0) !important;">
+                <v-stepper-header style="box-shadow: 0 3px 1px -2px rgba(0,0,0,0), 0 2px 2px 0 rgba(0,0,0,0), 0 1px 5px 0 rgba(0,0,0,0) !important;">
+                  <v-stepper-step step="1" complete>
+                    写真を撮影するよ！
+                  </v-stepper-step>
+                  <v-divider></v-divider>
+                  <v-stepper-step step="2" complete>
+                    写真を選択するよ！
+                  </v-stepper-step>
+                  <v-divider></v-divider>
+                  <v-stepper-step step="3" complete>
+                    データを入力するよ！
+                  </v-stepper-step>
+                  <v-divider></v-divider>
+                  <v-stepper-step step="4" complete>
+                    免許証完成！
+                  </v-stepper-step>
+                </v-stepper-header>
+              </v-stepper>
+            </v-container>
+          </v-flex>
+        </v-app-bar>
+        <!--メインの要素開始-->
+        <v-main>
+          <v-container fluid>
+              <v-layout id="wrap" class="justify-center mt-4">
+                  <div id="capture" style="box-sizing: border-box;" >
+                    <table class="pa-0 ma-0">
+                      <tr>
+                        <th>お名前</th>
+                        <td>{{ result.name  }}</td>
+                        <td>{{ Math.floor(ageavg)  }}さい</td>
+                      </tr>
+                      <tr>
+                        <th>会場</th>
+                        <td>NTPシステム株式会社</td>
+                        <td rowspan="2">{{result.gender}}</td>
+                      </tr>
+                      <tr>
+                        <th>交付</th>
+                        <td>2020年10月30日</td>
+                      </tr>
+                      <tr>
+                        <th colspan="2">
+                          おとなになるまで有効
+                        </th>
+                        <td rowspan="2" class="text-center">
+                          <v-img contain :src="result.img" width="150px">
+                          </v-img>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>
+                          免許の条件
+                        </th>
+                        <td>
+                          信号をまもります<br>
+                          みぎひだりをたしかめます<br>
+                          おうだんほどうをわたります
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>
+                          感情タイプ
+                        </th>
+                        <td>
+                          {{emotype}}
+                        </td>
+                        <td>
+                          NTPシステム株式会社
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+              </v-layout>
+              <v-layout justify-center>
+                <div id="canvasimagebox" class="pa-0 ma-0" style="display: none;"></div>
+              </v-layout>
+              <v-card-actions>
+                <v-layout justify-center>
+                  <v-btn dark color="indigo" text class="ma-2" v-bind:disabled="isPush" @click.stop="generateCanvasimage()">ダウンロードする</v-btn>
+                  <a href="./index.html">
+                    <v-btn @click="reset()" v-bind:disabled="isPush" text class="ma-2">
+                        最初の画面に戻る
+                    </v-btn>
+                  </a>
+                </v-layout>
+              </v-card-actions>
+          </v-container>
+        </v-main>
+        <v-footer class="text-center" color="rgba(0,0,0,0)">
+          <v-row>
+            <v-col>
+              <p class="text-center pa-4">&copy; NARITAPROJECT 2020 All Right Reserved.</p>
+            </v-col>
+          </v-row>
+        </v-footer>
+      </div>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuex"></script>
+  <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script>
+  <script src="https://unpkg.com/vuex-persistedstate/dist/vuex-persistedstate.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  <script src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+  <script src="./html2canvas.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/locale/ja.js"></script>
+  <script src="./result.js" type="module"></script>
+</body>
+</html>
